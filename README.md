@@ -1,216 +1,93 @@
-# Starter Template
+# Summoner Agent Library
 
-This repository is a **starter template** for building Python and Rust projects that integrate with [Summoner’s core codebase](https://github.com/Summoner-Network/summoner-core) for client/server communication.
+This repository is based on the `starter-template`, but unlike SDK components, it doesn’t include any integration tooling. Its sole purpose is to provide example agents for the Summoner protocol.
 
-It bootstraps a virtual environment, installs all dependencies, and provides tooling to validate the setup and run a test server.
 
-## Getting Started
+##  Using `setup()` in your agents
 
-To create your own project using this starter:
+Some agent examples in this repository include a function called `setup()`, which is awaited before the agent starts. If you're new to asyncio or to the Summoner protocol, it may not be immediately clear why this pattern is used or when it’s necessary.
 
-<p align="center">
-  <img width="450px" src="img/use_template.png" alt="Use this template button screenshot" />
-</p>
+This section explains the role of `setup()` and helps you understand when it’s needed — and when it isn’t.
 
-1. Click the **"Use this template"** button at the top of the [GitHub repository page](https://github.com/Summoner-Network/starter-template).
-2. Select **"Create a new repository"**.
-3. Name your project and click **"Create repository from template"**.
+### Core principle: Summoner agents run on an async event loop
 
-This will create your own copy of the repo that you can clone and start working from.
-
-## Installation
-
-First, clone the template repository and navigate into it:
-
-```bash
-git clone https://github.com/Summoner-Network/starter-template.git
-cd starter-template
-````
-
-Then, to install Summoner’s core codebase and its Python and Rust dependencies:
-
-```bash
-source install.sh setup
-```
-
-This will:
-
-* Clone Summoner’s core codebase into `core/`
-* Create a virtual environment in `venv/`
-* Install all required Python and Rust packages
-* Install the core package into the environment
-
-### Optional: Using `bash` Instead of `source`
-
-You may also run:
-
-```bash
-bash install.sh setup
-```
-
-However, if you do, you will need to **activate the virtual environment manually**:
-
-```bash
-source venv/bin/activate
-```
-
-## Verifying the Installation
-
-To launch a test server:
-
-```bash
-bash install.sh test_server
-```
-
-This will:
-
-* Create `test_server.py`
-* Create `test_server_config.json`
-* Launch the server using the installed Summoner core package
-* Generate `test_Server.log`
-
-You should see no import errors in `test_server.py` (if not, see [VSCode Integration](#vscode-integration)). In particular, this line should be recognized:
+When you launch an agent using:
 
 ```python
-from summoner.server import SummonerServer
+myagent.run(host="127.0.0.1", port=8888)
 ```
 
-### VSCode Integration
+Summoner internally creates and manages an asyncio event loop. Any asynchronous component you use — such as receiving and sending messages, connecting to databases, or creating locks and queues — must be attached to this event loop.
 
-To ensure VSCode recognizes the Summoner core dependency and your virtual environment:
+This is important because many common async tools in Python (like asyncio.Queue or aiosqlite) are bound to the specific loop they were created in. If they're created outside that loop — for example, at the top of your script — you may encounter errors like:
 
-1. Open the Command Palette: `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS)
-2. Run: `Python: Select Interpreter`
-3. Select the one labeled `'venv':venv`
-4. close and reopen the file `test_server.py`
-
-Once selected, VSCode will resolve `summoner` correctly as a dependency installed in `venv/lib`.
-
-## Cleaning and Resetting
-
-To clean generated test files:
-
-```bash
-bash install.sh clean
+```
+RuntimeError: Task ... got Future ... attached to a different loop
 ```
 
-This removes:
 
-* Any `test_*.py` files
-* Any `test_*.json` files
-* Any `test_*.log` files
+### When to use a `setup()` coroutine
 
-To fully reset the setup (delete `venv/` and `core/` and reinstall everything):
+You should use a setup coroutine when you need to:
 
-```bash
-bash install.sh reset
-```
+* Initialize an `asyncio.Queue` (e.g. for message buffering)
+* Connect to an async database like `aiosqlite`
+* Start background tasks using `loop.create_task`
+* Perform any other asynchronous initialization before the agent starts
 
-To delete all environment and Summoner core files:
+Note: You do not need setup() just to create an `asyncio.Lock`. Locks can safely be created at the top level before `myagent.run()`.
 
-```bash
-bash install.sh delete
-```
-
-## Using the Summoner Core in Your Project
-
-While the virtual environment is active:
-
-```bash
-source venv/bin/activate
-```
-
-You can import and use `summoner` like any other Python package:
+Here’s the typical pattern:
 
 ```python
-from summoner.server import SummonerServer
+message_buffer = None  # defined globally but initialized later
+
+async def setup():
+    global message_buffer
+    message_buffer = asyncio.Queue()
+
+    @myagent.receive(route="...")
+    async def receive(msg):
+        await message_buffer.put(msg)
+
+    @myagent.send(route="...")
+    async def send():
+        return await message_buffer.get()
+
+myagent.loop.run_until_complete(setup())
+myagent.run(host="127.0.0.1", port=8888)
 ```
 
-It is installed inside `venv/lib` along with all other dependencies.
-
-## Repo Structure (Initial)
-
-```
-├── img/                     # Images used in the README
-├── install.sh               # Bootstrap script for setup and testing
-├── README.md
-└── tooling/                 # Your native package goes here
-```
-
-After running `install.sh setup` and `install.sh test_server`, the structure will look like:
-
-```
-├── core/                    # Temporary clone of the Summoner SDK
-├── tooling/                 # Your in-development native module
-├── venv/                    # Python virtual environment
-├── test_server.py           # Autogenerated test file
-├── test_server_config.json
-├── test_Server.log
-└── ...
-```
-
-Your native module will be injected into the SDK structure automatically during setup.
+This ensures that message\_buffer is created inside the same event loop that the agent will use — avoiding loop mismatches and shutdown issues.
 
 
-## Developing a Native Module (`tooling/`)
+### When you don't need `setup()`
 
-Write your package inside the `tooling/` directory. For example:
+If your agent only defines routes (e.g. using @myagent.receive or @myagent.send) and all your logic is local to those handlers, you don’t need a setup coroutine. You can define everything inline and run the agent directly.
 
-```
-tooling/your_package/
-├── __init__.py         # e.g. contains: from .agent import Agent
-├── agent.py
-└── ...
-````
-
-In your `__init__.py`, re-export what you want to expose. This allows you to write:
+Example:
 
 ```python
-from tooling.your_package import Agent
-````
+myagent = SummonerClient(name="SimpleAgent", option="python")
 
-To make this import work at build time when integrated into the SDK, add the following to the top of your Python files:
+@myagent.receive(route="ping")
+async def handle_ping(msg):
+    print("Got:", msg)
 
-```python
-import sys, os
-target_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-if target_path not in sys.path:
-    sys.path.insert(0, target_path)
+@myagent.send(route="pong")
+async def respond():
+    return "pong"
+
+myagent.run(host="127.0.0.1", port=8888)
 ```
 
-This ensures Python can resolve your package inside the `summoner/` folder once your code is moved into the SDK.
+This is ideal for simple agents without internal state or external dependencies.
 
+### 📂 Examples that use `setup()`
 
-## SDK Construction
+To see this pattern in context, look at the following agents in this repository:
 
-When building the SDK, a script similar to `install.sh setup` will:
+* `a-reporter-*/`: uses setup() to initialize an async message queue for ordering and batching.
+* `a-seller-*/` and `a-buyer-*/`: use setup() to initialize shared state, aiosqlite databases, and background negotiation logic with locks.
 
-* Clone the `summoner-core` repository
-* Copy your folder `tooling/your_package/` into the core’s `summoner/` directory
-* Replace all import statements of the form:
-
-```python
-from tooling.your_package import Agent
-from summoner.your_package import Agent
-```
-
-with the cleaner form:
-
-```python
-from your_package import Agent
-```
-
-These imports will work as long as each file includes the same `sys.path` insert block, adapted to its directory depth:
-
-```python
-import sys, os
-target_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-if target_path not in sys.path:
-    sys.path.insert(0, target_path)
-```
-
-This allows your code to be seamlessly tested in development and then integrated cleanly into the final `summoner` package structure.
-
-## Resources
-
-* [Summoner Core GitHub Repository](https://github.com/Summoner-Network/summoner-core)
+These examples show how `setup()` gives you a controlled place to initialize anything async or stateful before the agent starts running. If your agent grows in complexity, especially if it uses shared state or persistent storage, setup() is your friend.
