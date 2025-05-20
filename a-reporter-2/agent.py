@@ -1,5 +1,5 @@
-import asyncio
 from summoner.client import SummonerClient
+import asyncio
 
 message_buffer = None  # initialized in setup()
 

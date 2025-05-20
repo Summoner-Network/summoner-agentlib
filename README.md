@@ -7,7 +7,7 @@ This repository is based on the `starter-template`, but unlike SDK components, i
 
 Some agent examples in this repository include a function called `setup()`, which is awaited before the agent starts. If you're new to asyncio or to the Summoner protocol, it may not be immediately clear why this pattern is used or when it’s necessary.
 
-This section explains the role of `setup()` and helps you understand when it’s needed — and when it isn’t.
+This section explains the role of `setup()` and helps you understand when it’s needed  --  and when it isn’t.
 
 ### Core principle: Summoner agents run on an async event loop
 
@@ -17,11 +17,11 @@ When you launch an agent using:
 myagent.run(host="127.0.0.1", port=8888)
 ```
 
-Summoner internally creates and manages an asyncio event loop. Any asynchronous component you use — such as receiving and sending messages, connecting to databases, or creating locks and queues — must be attached to this event loop.
+Summoner internally creates and manages an asyncio event loop. Any asynchronous component you use  --  such as receiving and sending messages, connecting to databases, or creating locks and queues  --  must be attached to this event loop.
 
-This is important because many common async tools in Python (like asyncio.Queue or aiosqlite) are bound to the specific loop they were created in. If they're created outside that loop — for example, at the top of your script — you may encounter errors like:
+This is important because many common async tools in Python (like `asyncio.Queue` or `aiosqlite`) are bound to the specific loop they were created in. If they're created outside that loop  --  for example, at the top of your script  --  you may encounter errors like:
 
-```
+```sh
 RuntimeError: Task ... got Future ... attached to a different loop
 ```
 
@@ -58,7 +58,7 @@ myagent.loop.run_until_complete(setup())
 myagent.run(host="127.0.0.1", port=8888)
 ```
 
-This ensures that message\_buffer is created inside the same event loop that the agent will use — avoiding loop mismatches and shutdown issues.
+This ensures that message\_buffer is created inside the same event loop that the agent will use  --  avoiding loop mismatches and shutdown issues.
 
 
 ### When you don't need `setup()`

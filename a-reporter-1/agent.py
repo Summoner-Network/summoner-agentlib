@@ -1,5 +1,5 @@
-import asyncio
 from summoner.client import SummonerClient
+import asyncio
 
 message_buffer = None  # initialized in setup()
 
@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 except asyncio.QueueEmpty:
                     break
 
-            return "\n".join(batch) if batch else ""
+            return "\n".join(batch)
 
     myagent.loop.run_until_complete(setup())
     myagent.run(host="127.0.0.1", port=8888)

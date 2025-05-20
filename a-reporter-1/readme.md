@@ -22,7 +22,7 @@ The agent then waits until the send route is triggered. The send route behaves a
 * During those 5 seconds, any additional messages are added to the batch.
 * After 5 seconds, the entire batch is sent as a single message (joined with newline characters).
 
-If no messages were ever received, nothing is sent — the agent stays idle.
+If no messages were ever received, nothing is sent  --  the agent stays idle.
 
 ## 🚀 Demo: How the Agent Behaves
 
