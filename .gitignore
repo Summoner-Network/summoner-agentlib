@@ -1,3 +1,8 @@
+# Remy's 
+draft.txt
+*.db*
+
+# Starter Template
 core/
 .DS_Store
 

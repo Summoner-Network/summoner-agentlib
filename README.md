@@ -1,46 +1,42 @@
 # Summoner Agent Library
 
-This repository is based on the `starter-template`, but unlike SDK components, it doesn’t include any integration tooling. Its sole purpose is to provide example agents for the Summoner protocol.
+This repository is based on `starter-template`, but instead of providing integration tooling intended for merging with Summoner's core SDK, it offers example agents for the Summoner protocol.
 
+## Using `setup()` in Your Agents
 
-##  Using `setup()` in your agents
+Some agent examples define a `setup()` coroutine, which is awaited before the agent starts. This section explains why this pattern exists and when it is necessary.
 
-Some agent examples in this repository include a function called `setup()`, which is awaited before the agent starts. If you're new to asyncio or to the Summoner protocol, it may not be immediately clear why this pattern is used or when it’s necessary.
+### Core Principle: Summoner Agents Use an Async Event Loop
 
-This section explains the role of `setup()` and helps you understand when it’s needed  --  and when it isn’t.
-
-### Core principle: Summoner agents run on an async event loop
-
-When you launch an agent using:
+Launching an agent with:
 
 ```python
 myagent.run(host="127.0.0.1", port=8888)
 ```
 
-Summoner internally creates and manages an asyncio event loop. Any asynchronous component you use  --  such as receiving and sending messages, connecting to databases, or creating locks and queues  --  must be attached to this event loop.
+creates and manages an `asyncio` event loop internally. Any asynchronous components -- such as message handling, database connections, or task scheduling -- must be created within this loop.
 
-This is important because many common async tools in Python (like `asyncio.Queue` or `aiosqlite`) are bound to the specific loop they were created in. If they're created outside that loop  --  for example, at the top of your script  --  you may encounter errors like:
+Asynchronous tools like `asyncio.Queue` or `aiosqlite` are bound to the event loop that created them. If they are created outside the Summoner loop (e.g. at the top level of your script), you may encounter errors such as:
 
 ```sh
 RuntimeError: Task ... got Future ... attached to a different loop
 ```
 
+### When to Use a `setup()` Coroutine
 
-### When to use a `setup()` coroutine
+Use `setup()` when asynchronous initialization is required, such as:
 
-You should use a setup coroutine when you need to:
+* Initializing an `asyncio.Queue` for buffering messages
+* Connecting to an async database (e.g. `aiosqlite`)
+* Creating background tasks using `loop.create_task`
+* Performing other async setup tasks
 
-* Initialize an `asyncio.Queue` (e.g. for message buffering)
-* Connect to an async database like `aiosqlite`
-* Start background tasks using `loop.create_task`
-* Perform any other asynchronous initialization before the agent starts
+Note: `asyncio.Lock` can be safely created before `myagent.run()`, without requiring `setup()`.
 
-Note: You do not need setup() just to create an `asyncio.Lock`. Locks can safely be created at the top level before `myagent.run()`.
-
-Here’s the typical pattern:
+Example pattern:
 
 ```python
-message_buffer = None  # defined globally but initialized later
+message_buffer = None
 
 async def setup():
     global message_buffer
@@ -58,17 +54,16 @@ myagent.loop.run_until_complete(setup())
 myagent.run(host="127.0.0.1", port=8888)
 ```
 
-This ensures that message\_buffer is created inside the same event loop that the agent will use  --  avoiding loop mismatches and shutdown issues.
+This ensures all async objects are bound to the correct event loop.
 
+### When `setup()` Is Not Needed
 
-### When you don't need `setup()`
-
-If your agent only defines routes (e.g. using @myagent.receive or @myagent.send) and all your logic is local to those handlers, you don’t need a setup coroutine. You can define everything inline and run the agent directly.
+If your agent only defines handlers using `@myagent.receive` and `@myagent.send`, and all logic is local to those handlers, `setup()` is unnecessary.
 
 Example:
 
 ```python
-myagent = SummonerClient(name="SimpleAgent", option="python")
+myagent = SummonerClient(name="SimpleAgent")
 
 @myagent.receive(route="ping")
 async def handle_ping(msg):
@@ -81,13 +76,13 @@ async def respond():
 myagent.run(host="127.0.0.1", port=8888)
 ```
 
-This is ideal for simple agents without internal state or external dependencies.
+This approach is suitable for simple agents with no shared state or external dependencies.
 
-### 📂 Examples that use `setup()`
+### Examples That Use `setup()`
 
-To see this pattern in context, look at the following agents in this repository:
+Relevant examples in this repository:
 
-* `a-reporter-*/`: uses setup() to initialize an async message queue for ordering and batching.
-* `a-seller-*/` and `a-buyer-*/`: use setup() to initialize shared state, aiosqlite databases, and background negotiation logic with locks.
+* `a-reporter-*`: uses `setup()` to initialize a message queue for ordering and batching
+* `a-seller-*` and `a-buyer-*`: use `setup()` for shared state, `aiosqlite` initialization, and background negotiation logic
 
-These examples show how `setup()` gives you a controlled place to initialize anything async or stateful before the agent starts running. If your agent grows in complexity, especially if it uses shared state or persistent storage, setup() is your friend.
+These examples show how `setup()` provides a structured way to initialize asynchronous or stateful components before the agent starts.

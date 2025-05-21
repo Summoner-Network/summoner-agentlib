@@ -36,42 +36,44 @@ If no questions arrive, the send handler never fires and the agent remains idle.
 
 ## ▶️ Quick Demo
 
-1. **Start the server**  (in `terminal 1`)
-```bash
-python server.py
-```
+You will need three terminals:
 
-2. **Run ChatAgent and ask questions** (in `terminal 2`)
+1. **Terminal 1: Start the server** 
+  ```bash
+  python server.py
+  ```
 
-```bash
-python a-chat-1/agent.py
-```
+2. **Terminal 2: Run ChatAgent and ask questions**
 
-```
-2025-05-20 16:58:35,360 - ChatAgent - INFO - Connected to server.
-s> How old are you?
-[Received] I do not age like humans do.
-r> What time is it?
-[Received] I suggest checking your device's clock.
-r> How are you?
-[Received] I am operating smoothly, thank you.
-r>
-```
+  ```bash
+  python a-chat-1/agent.py
+  ```
 
-3. **Run AnswerBot** (in `terminal 3`)
+  ```
+  2025-05-20 16:58:35,360 - ChatAgent - INFO - Connected to server.
+  s> How old are you?
+  [Received] I do not age like humans do.
+  r> What time is it?
+  [Received] I suggest checking your device's clock.
+  r> How are you?
+  [Received] I am operating smoothly, thank you.
+  r>
+  ```
 
-```bash
-python a-answer-1/agent.py
-```
+3. **Terminal 3: Run AnswerBot**
 
-```
-2025-05-20 16:58:32,091 - AnswerBot - INFO - Connected to server.
-Received: {'addr': '127.0.0.1:58211', 'content': 'How old are you?'}
-Received: {'addr': '127.0.0.1:58211', 'content': 'What time is it?'}
-Received: {'addr': '127.0.0.1:58211', 'content': 'How are you?'}
-```
+  ```bash
+  python a-answer-1/agent.py
+  ```
 
-AnswerBot logs each raw request and replies in the same order as the chat agent sees them.
+  ```
+  2025-05-20 16:58:32,091 - AnswerBot - INFO - Connected to server.
+  Received: {'addr': '127.0.0.1:58211', 'content': 'How old are you?'}
+  Received: {'addr': '127.0.0.1:58211', 'content': 'What time is it?'}
+  Received: {'addr': '127.0.0.1:58211', 'content': 'How are you?'}
+  ```
+
+  AnswerBot logs each raw request and replies in the same order as the chat agent sees them.
 
 
 ## 🚦 Behavior Summary

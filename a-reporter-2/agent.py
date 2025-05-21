@@ -4,7 +4,7 @@ import asyncio
 message_buffer = None  # initialized in setup()
 
 if __name__ == "__main__":
-    myagent = SummonerClient(name="ReporterAgent", option="python")
+    myagent = SummonerClient(name="ReporterAgent")
 
     async def setup():
         global message_buffer

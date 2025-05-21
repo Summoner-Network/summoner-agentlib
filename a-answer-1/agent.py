@@ -14,7 +14,7 @@ with qa_path.open("r", encoding="utf-8") as f:
 message_buffer = None  # initialized in setup()
 
 if __name__ == "__main__":
-    myagent = SummonerClient(name="AnswerBot", option="python")
+    myagent = SummonerClient(name="AnswerBot")
 
     async def setup():
         global message_buffer

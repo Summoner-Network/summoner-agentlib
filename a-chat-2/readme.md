@@ -32,7 +32,6 @@ Use this version when you expect to receive timed or grouped reports (lists) rat
    * If it’s a **string**, print it directly.
 2. **Prompt** you at `s> ` and send whatever you type on the `custom_send` route.
 
----
 
 ## ▶️ Running the Agent
 
@@ -49,27 +48,27 @@ s>
 
 **Example – incoming batched report**:
 
-```
-[Received] Hi
-[Received] How are you?
-[Received] Bye
-r> Got it, thanks!
-```
+  ```
+  [Received] Hi
+  [Received] How are you?
+  [Received] Bye
+  r> Got it, thanks!
+  ```
 
 **Example – incoming single message**:
 
-```
-[Received] Are you there?
-r> Yes, I’m here!
-```
+  ```
+  [Received] Are you there?
+  r> Yes, I’m here!
+  ```
 
 **Server warning example**:
 
-If a message starts with `"Warning:"`, it is specially tagged as:
+  If a message starts with `"Warning:"`, it is specially tagged as:
 
-```
-[From server] Warning: Something went wrong
-```
+  ```
+  [From server] Warning: Something went wrong
+  ```
 
 ## 🚦 Summary of Behavior
 

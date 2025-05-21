@@ -26,53 +26,53 @@ If no messages were ever received, nothing is sent  --  the agent stays idle.
 
 ## 🚀 Demo: How the Agent Behaves
 
-This agent listens for messages, waits 5 seconds after receiving the first one, then sends all buffered messages as a single report. Here's how it works in action:
+This agent listens for messages, waits 5 seconds after receiving the first one, then sends all buffered messages as a single report. Here is how it works in action (you will need three terminals):
 
 
-### 🖥️ Terminal 1: Start the server
+1. **Terminal 1: Start the server**
 
-```bash
-python server.py
-```
+    ```bash
+    python server.py
+    ```
 
-### 💬 Terminal 2: Start a chat agent and send a few messages quickly
+2. **Terminal 2: Start a chat agent and send a few messages quickly**
 
-```bash
-python a-chat-1/agent.py
-```
+    ```bash
+    python a-chat-1/agent.py
+    ```
 
-Example interaction:
+    Example interaction:
 
-```
-2025-05-20 10:33:30,969 - ChatAgent - INFO - Connected to server.
-s> Hi
-s> How are you?
-s> Bye
-[Received] Hi
-How are you?
-Bye
-r>
-```
+    ```
+    2025-05-20 10:33:30,969 - ChatAgent - INFO - Connected to server.
+    s> Hi
+    s> How are you?
+    s> Bye
+    [Received] Hi
+    How are you?
+    Bye
+    r>
+    ```
 
-Note: All messages are sent within a few seconds.
+    Note: All messages are sent within a few seconds.
 
-### 📡 Terminal 3: Start the reporting agent
+3. **Terminal 3: Start the reporting agent**
 
-```bash
-python a-reporter-1/agent.py
-```
+    ```bash
+    python a-reporter-1/agent.py
+    ```
 
-Output:
+    Output:
 
-```
-2025-05-20 10:33:34,662 - ReporterAgent - INFO - Connected to server.
-[Received] Hi
-[Received] How are you?
-[Received] Bye
-r>
-```
+    ```
+    2025-05-20 10:33:34,662 - ReporterAgent - INFO - Connected to server.
+    [Received] Hi
+    [Received] How are you?
+    [Received] Bye
+    r>
+    ```
 
-After the first message is received, the agent waits 5 seconds, gathers additional messages during that window, and then sends the entire batch back to the server (or other agents listening).
+    After the first message is received, the agent waits 5 seconds, gathers additional messages during that window, and then sends the entire batch back to the server (or other agents listening).
 
 
 ## 🚦 Behavior Summary

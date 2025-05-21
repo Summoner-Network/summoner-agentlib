@@ -11,7 +11,7 @@ with qa_path.open("r", encoding="utf-8") as f:
     QUESTIONS = list(json.load(f).keys())
 
 if __name__ == "__main__":
-    myagent = SummonerClient(name="QuestionBot", option="python")
+    myagent = SummonerClient(name="QuestionBot")
 
     # Create a simple cycling iterator
     question_cycle = cycle(QUESTIONS)

@@ -21,37 +21,39 @@ If you ever reach the end of the question list, it loops back to the first quest
 
 ## ▶️ Running the Demo
 
-1. **Start the server**  (in `terminal 1`)
-```bash
-python server.py
-```
+You will need three terminals:
 
-2. **Start the AnswerBot** (in `terminal 2`)
+1. **Terminal 1: Start the server** 
+   ```bash
+   python server.py
+   ```
 
-```bash
-python a-answer-1/agent.py
-```
+2. **Terminal 2: Start the AnswerBot** 
 
-It connects and stands by to answer questions from `qa.json`.
+   ```bash
+   python a-answer-1/agent.py
+   ```
 
-3. **Start the QuestionBot** (in `terminal 3`)
+   It connects and stands by to answer questions from `qa.json`.
 
-```bash
-python a-question-1/agent.py
-```
+3. **Terminal 3: Start the QuestionBot** 
 
-You’ll see output like:
+   ```bash
+   python a-question-1/agent.py
+   ```
 
-```
-2025-05-20 17:50:36,277 - QuestionBot - INFO - Connected to server.
-(Asked: What is your name?)
-Received: [Response to 127.0.0.1:58745] I am AnswerBot.
-(Asked: What is the meaning of life?)
-Received: [Response to 127.0.0.1:58745] 42.
-(Asked: Do you like Rust or Python?)
-Received: [Response to 127.0.0.1:58745] Both have their strengths!
-…
-```
+   You’ll see output like:
+
+   ```
+   2025-05-20 17:50:36,277 - QuestionBot - INFO - Connected to server.
+   (Asked: What is your name?)
+   Received: [Response to 127.0.0.1:58745] I am AnswerBot.
+   (Asked: What is the meaning of life?)
+   Received: [Response to 127.0.0.1:58745] 42.
+   (Asked: Do you like Rust or Python?)
+   Received: [Response to 127.0.0.1:58745] Both have their strengths!
+   …
+   ```
 
 
 ## 🚦 Behavior Summary
